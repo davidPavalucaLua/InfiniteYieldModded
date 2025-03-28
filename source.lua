@@ -4752,6 +4752,31 @@ CMDs[#CMDs + 1] = {NAME = 'listento [player]', DESC = 'Listens to the area aroun
 CMDs[#CMDs + 1] = {NAME = 'unlistento', DESC = 'Disables listento'}
 CMDs[#CMDs + 1] = {NAME = 'jerk', DESC = 'Makes you jork it'}
 CMDs[#CMDs + 1] = {NAME = 'unsuspendvc', DESC = 'Unsuspends you from voice chat'}
+CMDs[#CMDs + 1] = {NAME = 'antiaim / aa', DESC = 'Enables anti-aim (rotates character 179° relative to movement)'}
+CMDs[#CMDs + 1] = {NAME = 'unantiaim / unaa', DESC = 'Disables anti-aim'}
+CMDs[#CMDs + 1] = {NAME = 'bhop', DESC = 'Enables bunny hop (auto jump when grounded)'}
+CMDs[#CMDs + 1] = {NAME = 'unbhop', DESC = 'Disables bunny hop'}
+CMDs[#CMDs + 1] = {NAME = 'cframespeed / cspeed', DESC = 'Applies CFrame-based speed boost (listens to WASD inputs)'}
+CMDs[#CMDs + 1] = {NAME = 'uncframespeed / uncspeed', DESC = 'Disables CFrame speed boost'}
+CMDs[#CMDs + 1] = {NAME = 'invertgravity', DESC = 'Inverts gravity on your character.'}
+CMDs[#CMDs + 1] = {NAME = 'uninvertgravity', DESC = 'Reverts gravity inversion.'}
+CMDs[#CMDs + 1] = {NAME = 'randomwalk', DESC = 'Enables random movement jitter.'}
+CMDs[#CMDs + 1] = {NAME = 'unrandomwalk', DESC = 'Disables random walk.'}
+CMDs[#CMDs + 1] = {NAME = 'rainbowhead', DESC = 'Continuously cycles your head color.'}
+CMDs[#CMDs + 1] = {NAME = 'unrainbowhead', DESC = 'Stops rainbow head effect.'}
+CMDs[#CMDs + 1] = {NAME = 'vanish', DESC = 'Makes your character invisible and non-collidable.'}
+CMDs[#CMDs + 1] = {NAME = 'unvanish', DESC = 'Restores visibility and collisions.'}
+CMDs[#CMDs + 1] = {NAME = 'spawnclone', DESC = 'Clones your character and spawns it nearby.'}
+CMDs[#CMDs + 1] = {NAME = 'orbit', DESC = 'Orbits your character around a point.'}
+CMDs[#CMDs + 1] = {NAME = 'unorbit', DESC = 'Stops orbiting.'}
+CMDs[#CMDs + 1] = {NAME = 'multijump', DESC = 'Temporarily multiplies your jump power.'}
+CMDs[#CMDs + 1] = {NAME = 'unmultijump', DESC = 'Resets jump power to default.'}
+CMDs[#CMDs + 1] = {NAME = 'gravityshift', DESC = 'Changes workspace gravity.'}
+CMDs[#CMDs + 1] = {NAME = 'ungravityshift', DESC = 'Resets gravity to default.'}
+CMDs[#CMDs + 1] = {NAME = 'fakelag', DESC = 'Simulates lag with random jitter.'}
+CMDs[#CMDs + 1] = {NAME = 'unfakelag', DESC = 'Stops fakelag effect.'}
+CMDs[#CMDs + 1] = {NAME = 'timefreeze', DESC = 'Freezes game time.'}
+CMDs[#CMDs + 1] = {NAME = 'untimefreeze', DESC = 'Unfreezes game time.'}
 wait()
 
 for i = 1, #CMDs do
@@ -8545,6 +8570,197 @@ addcmd('btools',{},function(args, speaker)
 		Tool.Name = randomString()
 		Tool.Parent = speaker:FindFirstChildOfClass("Backpack")
 	end
+end)
+
+-- Invert Gravity
+addcmd("invertgravity", {}, function(args, speaker)
+    local char = speaker.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
+        local bf = Instance.new("BodyForce", hrp)
+        bf.Force = Vector3.new(0, workspace.Gravity * hrp:GetMass() * 2, 0)
+        _G.invertGravityBF = bf
+        notify("Gravity inverted")
+    end
+end)
+addcmd("uninvertgravity", {"revertgravity"}, function(args, speaker)
+    if _G.invertGravityBF then
+        _G.invertGravityBF:Destroy()
+        _G.invertGravityBF = nil
+        notify("Gravity reverted")
+    end
+end)
+
+-- Random Walk
+addcmd("randomwalk", {}, function(args, speaker)
+    local char = speaker.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        _G.randomwalkConn = game:GetService("RunService").RenderStepped:Connect(function()
+            local hrp = char.HumanoidRootPart
+            local offset = Vector3.new(math.random(-1,1)*0.1, 0, math.random(-1,1)*0.1)
+            hrp.CFrame = hrp.CFrame * CFrame.new(offset)
+        end)
+        notify("Random walk enabled")
+    end
+end)
+addcmd("unrandomwalk", {}, function(args, speaker)
+    if _G.randomwalkConn then
+        _G.randomwalkConn:Disconnect()
+        _G.randomwalkConn = nil
+        notify("Random walk disabled")
+    end
+end)
+
+-- Rainbow Head
+addcmd("rainbowhead", {}, function(args, speaker)
+    local char = speaker.Character
+    if char and char:FindFirstChild("Head") then
+        _G.rainbowHeadConn = game:GetService("RunService").RenderStepped:Connect(function()
+            char.Head.BrickColor = BrickColor.Random()
+        end)
+        notify("Rainbow head enabled")
+    end
+end)
+addcmd("unrainbowhead", {}, function(args, speaker)
+    if _G.rainbowHeadConn then
+        _G.rainbowHeadConn:Disconnect()
+        _G.rainbowHeadConn = nil
+        notify("Rainbow head disabled")
+    end
+end)
+
+-- Vanish
+addcmd("vanish", {}, function(args, speaker)
+    local char = speaker.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 1
+                part.CanCollide = false
+            end
+        end
+        notify("Vanish enabled")
+    end
+end)
+addcmd("unvanish", {}, function(args, speaker)
+    local char = speaker.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+                part.CanCollide = true
+            end
+        end
+        notify("Vanish disabled")
+    end
+end)
+
+-- Spawn Clone
+addcmd("spawnclone", {}, function(args, speaker)
+    local char = speaker.Character
+    if char then
+        local clone = char:Clone()
+        clone.Parent = workspace
+        clone:MoveTo(char:GetPrimaryPartCFrame().p + Vector3.new(5, 0, 0))
+        notify("Clone spawned")
+    end
+end)
+
+-- Orbit (parameters: centerX, centerY, centerZ, radius, speed)
+addcmd("orbit", {}, function(args, speaker)
+    local centerX = tonumber(args[1]) or 0
+    local centerY = tonumber(args[2]) or 50
+    local centerZ = tonumber(args[3]) or 0
+    local radius = tonumber(args[4]) or 10
+    local speed = tonumber(args[5]) or 5
+    local char = speaker.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        _G.orbitConn = game:GetService("RunService").RenderStepped:Connect(function()
+            local hrp = char.HumanoidRootPart
+            local angle = tick() * speed
+            local newX = centerX + math.cos(angle) * radius
+            local newZ = centerZ + math.sin(angle) * radius
+            hrp.CFrame = CFrame.new(newX, centerY, newZ, -math.cos(angle), 0, -math.sin(angle))
+        end)
+        notify("Orbit enabled")
+    end
+end)
+addcmd("unorbit", {}, function(args, speaker)
+    if _G.orbitConn then
+        _G.orbitConn:Disconnect()
+        _G.orbitConn = nil
+        notify("Orbit disabled")
+    end
+end)
+
+-- Multijump: Multiply jump power (parameter: multiplier)
+addcmd("multijump", {}, function(args, speaker)
+    local mult = tonumber(args[1]) or 2
+    local char = speaker.Character
+    if char and char:FindFirstChild("Humanoid") then
+        local hum = char.Humanoid
+        hum.JumpPower = hum.JumpPower * mult
+        notify("Multijump enabled (x" .. mult .. ")")
+    end
+end)
+addcmd("unmultijump", {}, function(args, speaker)
+    local char = speaker.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.JumpPower = 50  -- reset to default (adjust if necessary)
+        notify("Multijump disabled")
+    end
+end)
+
+-- Gravity Shift: Change workspace gravity (parameter: new gravity)
+addcmd("gravityshift", {}, function(args, speaker)
+    local newGravity = tonumber(args[1]) or 50
+    _G.originalGravity = _G.originalGravity or workspace.Gravity
+    workspace.Gravity = newGravity
+    notify("Gravity set to " .. newGravity)
+end)
+addcmd("ungravityshift", {}, function(args, speaker)
+    if _G.originalGravity then
+        workspace.Gravity = _G.originalGravity
+        _G.originalGravity = nil
+        notify("Gravity reset")
+    end
+end)
+
+-- Fakelag: Applies a slight random offset to simulate lag (parameter: jitter amount)
+addcmd("fakelag", {}, function(args, speaker)
+    local jitter = tonumber(args[1]) or 0.5
+    local char = speaker.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        _G.fakelagConn = game:GetService("RunService").RenderStepped:Connect(function(dt)
+            local hrp = char.HumanoidRootPart
+            local offset = Vector3.new(math.random(-100,100)/1000 * jitter, 0, math.random(-100,100)/1000 * jitter)
+            hrp.CFrame = hrp.CFrame * CFrame.new(offset)
+        end)
+        notify("Fakelag enabled (jitter: " .. jitter .. ")")
+    end
+end)
+addcmd("unfakelag", {}, function(args, speaker)
+    if _G.fakelagConn then
+        _G.fakelagConn:Disconnect()
+        _G.fakelagConn = nil
+        notify("Fakelag disabled")
+    end
+end)
+
+-- Time Freeze: Freeze the game’s time (works by continuously resetting TimeOfDay)
+addcmd("timefreeze", {}, function(args, speaker)
+    _G.oldTimeOfDay = workspace.TimeOfDay
+    _G.timeFreezeConn = game:GetService("RunService").RenderStepped:Connect(function()
+        workspace.TimeOfDay = _G.oldTimeOfDay
+    end)
+    notify("Time frozen")
+end)
+addcmd("untimefreeze", {}, function(args, speaker)
+    if _G.timeFreezeConn then
+        _G.timeFreezeConn:Disconnect()
+        _G.timeFreezeConn = nil
+        notify("Time unfrozen")
+    end
 end)
 
 addcmd("antiaim", {"aa"}, function(args, speaker)

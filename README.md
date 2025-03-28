@@ -1,7 +1,7 @@
 # InfiniteYieldModded
 A modded version of the original Infinite Yield
 
-#**Original Infinite Yield**#
+# **Original Infinite Yield**
 
 You can find the original Infinite Yield repo here: https://github.com/EdgeIY/infiniteyield
 

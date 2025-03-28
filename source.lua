@@ -8547,6 +8547,81 @@ addcmd('btools',{},function(args, speaker)
 	end
 end)
 
+addcmd("antiaim", {"aa"}, function(args, speaker)
+    if _G.antiAimActive then return end
+    _G.antiAimActive = true
+    _G.antiAimConn = game:GetService("RunService").RenderStepped:Connect(function()
+        local char = speaker.Character
+        if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+            local hrp = char.HumanoidRootPart
+            local moveDir = char.Humanoid.MoveDirection
+            if moveDir.Magnitude > 0 then
+                local angle = math.atan2(-moveDir.X, -moveDir.Z)
+                hrp.CFrame = CFrame.new(hrp.Position) * CFrame.Angles(0, angle + math.rad(179), 0)
+            end
+        end
+    end)
+    notify("Anti-Aim enabled")
+end)
+
+addcmd("unantiaim", {"unaa"}, function(args, speaker)
+    if _G.antiAimActive and _G.antiAimConn then
+        _G.antiAimConn:Disconnect()
+        _G.antiAimConn = nil
+        _G.antiAimActive = false
+        notify("Anti-Aim disabled")
+    end
+end)
+
+addcmd("bhop", {}, function(args, speaker)
+    if _G.bhopActive then return end
+    _G.bhopActive = true
+    _G.bhopConn = game:GetService("RunService").RenderStepped:Connect(function()
+        local char = speaker.Character
+        if char and char:FindFirstChild("Humanoid") then
+            local hum = char.Humanoid
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Running or state == Enum.HumanoidStateType.Landed then
+                hum.Jump = true
+            end
+        end
+    end)
+    notify("Bunny Hop enabled")
+end)
+
+addcmd("unbhop", {}, function(args, speaker)
+    if _G.bhopActive and _G.bhopConn then
+        _G.bhopConn:Disconnect()
+        _G.bhopConn = nil
+        _G.bhopActive = false
+        notify("Bunny Hop disabled")
+    end
+end)
+
+addcmd("cframespeed", {}, function(args, speaker)
+    local speed = tonumber(args[1]) or 20
+    if _G.cframeSpeedConn then _G.cframeSpeedConn:Disconnect() end
+    _G.cframeSpeedConn = game:GetService("RunService").RenderStepped:Connect(function(dt)
+        local char = speaker.Character
+        if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+            local hrp = char.HumanoidRootPart
+            local moveDir = char.Humanoid.MoveDirection
+            if moveDir.Magnitude > 0 then
+                hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
+            end
+        end
+    end)
+    notify("CFrame Speed enabled")
+end)
+
+addcmd("uncframespeed", {}, function(args, speaker)
+    if _G.cframeSpeedConn then
+        _G.cframeSpeedConn:Disconnect()
+        _G.cframeSpeedConn = nil
+        notify("CFrame Speed disabled")
+    end
+end)
+
 addcmd('f3x',{'fex'},function(args, speaker)
     loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/f3x.lua"))()
 end)
